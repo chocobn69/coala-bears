@@ -22,37 +22,9 @@ class InferBad {
 }
 """
 
-good_objc_file = """
-#import <Foundation/Foundation.h>
-
-@interface Hello: NSObject
-@property NSString* s;
-@end
-
-@implementation Hello
-NSString* m() {
-    Hello* hello = nil;
-    return hello.s;
-}
-@end
-"""
-
-bad_objc_file = """
-#import <Foundation/Foundation.h>
-
-@interface Hello: NSObject
-@property NSString* s;
-@end
-
-@implementation Hello
-NSString* m() {
-    Hello* hello = nil;
-    return hello->_s;
-}
-@end
-"""
-
 good_c_file = """
+#include <stdlib.h>
+
 void test() {
   int *s = NULL;
   if (s != NULL) {
@@ -82,6 +54,6 @@ InferBearFallbackLanguageTest = verify_local_bear(
     tempfile_kwargs={"suffix": ".java"}, settings={'language': 'bullshit'})
 
 
-InferBearObjCTest = verify_local_bear(
-    InferBear, valid_files=(good_objc_file,), invalid_files=(bad_objc_file,),
-    tempfile_kwargs={"suffix": ".m"}, settings={'language': 'objective-c'})
+InferBearCTest = verify_local_bear(
+    InferBear, valid_files=(good_c_file,), invalid_files=(bad_c_file,),
+    tempfile_kwargs={"suffix": ".c"}, settings={'language': 'objective-c'})
