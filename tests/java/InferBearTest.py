@@ -2,7 +2,9 @@ from bears.java.InferBear import InferBear
 from tests.LocalBearTestHelper import verify_local_bear
 
 
-good_file = """
+# All examples taken from http://fbinfer.com/docs/hello-world.html
+
+good_java_file = """
 class InferGood {
     int test() {
         String s = null;
@@ -11,7 +13,7 @@ class InferGood {
 }
 """
 
-bad_file = """
+bad_java_file = """
 class InferBad {
     int test() {
         String s = null;
@@ -20,8 +22,66 @@ class InferBad {
 }
 """
 
+good_objc_file = """
+#import <Foundation/Foundation.h>
 
-InferBearTest = verify_local_bear(InferBear,
-                                  valid_files=(good_file,),
-                                  invalid_files=(bad_file,),
-                                  tempfile_kwargs={"suffix": ".java"})
+@interface Hello: NSObject
+@property NSString* s;
+@end
+
+@implementation Hello
+NSString* m() {
+    Hello* hello = nil;
+    return hello.s;
+}
+@end
+"""
+
+bad_objc_file = """
+#import <Foundation/Foundation.h>
+
+@interface Hello: NSObject
+@property NSString* s;
+@end
+
+@implementation Hello
+NSString* m() {
+    Hello* hello = nil;
+    return hello->_s;
+}
+@end
+"""
+
+good_c_file = """
+void test() {
+  int *s = NULL;
+  if (s != NULL) {
+    *s = 42;
+  }
+}
+"""
+
+bad_c_file = """
+#include <stdlib.h>
+
+void test() {
+  int *s = NULL;
+  *s = 42;
+}
+"""
+
+
+InferBearJavaTest = verify_local_bear(
+    InferBear, valid_files=(good_java_file,), invalid_files=(bad_java_file,),
+    tempfile_kwargs={"suffix": ".java"}, settings={'language': 'JAVA'})
+
+
+# InferBear falls back to java if no valid language is given
+InferBearFallbackLanguageTest = verify_local_bear(
+    InferBear, valid_files=(good_java_file,), invalid_files=(bad_java_file,),
+    tempfile_kwargs={"suffix": ".java"}, settings={'language': 'bullshit'})
+
+
+InferBearObjCTest = verify_local_bear(
+    InferBear, valid_files=(good_objc_file,), invalid_files=(bad_objc_file,),
+    tempfile_kwargs={"suffix": ".m"}, settings={'language': 'objective-c'})
